@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <data>
+        <variable
+            name="product"
+            type="com.androidstudy.androidjetpackdemo.data.model.Product" />
+        <variable
+            name="user"
+            type="com.androidstudy.androidjetpackdemo.data.model.User" />
+    </data>
+
+
+
+    <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        card_view:cardCornerRadius="4dp"
+        card_view:cardElevation="6dp"
+        card_view:contentPadding="@dimen/card_view_padding">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@{`First Name ` + user.firstName}"
+                tools:text="First Name" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@{`Last Name ` + user.lastName}"
+                tools:text="Last Name" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{`My Age ` + user.age}"
+                tools:text="Age" />
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+</layout>
+
