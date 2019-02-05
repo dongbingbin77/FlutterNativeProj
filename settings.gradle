@@ -1,5 +1,7 @@
-include ':app'
+
+include ':app', ':appiumdemo'
 
 setBinding(new Binding([gradle:this]))
 
-evaluate(new File(settingsDir,'..\\..\\flutter_project\\my_flutter\\.android\\include_flutter.groovy'))
+//evaluate(new File(settingsDir,'..\\..\\flutter_project\\my_flutter\\.android\\include_flutter.groovy'))
+evaluate(new File(settingsDir,'../../flutter_project/my_flutter/.android/include_flutter.groovy'))
