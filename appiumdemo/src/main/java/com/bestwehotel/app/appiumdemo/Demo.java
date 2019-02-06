@@ -7,7 +7,9 @@ import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 import io.appium.java_client.MobileElement;
+import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.touch.offset.PointOption;
 
 public class Demo {
     public static void main(String[] args){
@@ -36,7 +38,7 @@ public class Demo {
         try {
             driver = new AndroidDriver(new URL("http://127.0.0.1:4723/wd/hub"), des);//虚拟机默认地址
             driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);//设置超时等待时间,默认250ms
-
+            //driver.
             MobileElement el1 = (MobileElement) driver.findElementById("com.androidstudy.androidjetpackdemo:id/firstName");
             el1.sendKeys("123321");
             //el1.execute()
@@ -46,6 +48,18 @@ public class Demo {
             el3.sendKeys("dingbingb888");
             MobileElement el4 = (MobileElement) driver.findElementById("com.androidstudy.androidjetpackdemo:id/saveUser");
             el4.click();
+
+            for(int i=0;i<10;i++) {
+                el4.click();
+                el4.click();
+                el4.click();
+                el4.click();
+            }
+
+            new TouchAction(driver).press(PointOption.point(150, 1569)).waitAction().moveTo(PointOption.point(150, 1079)).release().perform();
+
+            //new TouchAction(driver).
+
         }catch (Exception ex1){
             ex1.printStackTrace();
         }
