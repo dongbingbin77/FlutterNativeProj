@@ -14,7 +14,9 @@ import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.touch.WaitOptions;
 import io.appium.java_client.touch.offset.PointOption;
 
-public class CtripDemo {
+import static com.bestwehotel.app.appiumdemo.CtripHotelSelect.selectBrandTab;
+
+public class CtripCitySelect {
     public static void main(String[] args){
         AndroidDriver driver = getDriver();
         if(driver!=null){
@@ -24,41 +26,54 @@ public class CtripDemo {
                 //scrollCityList(driver);
                 clickCityIndexA(driver);
                 clickNextCity(driver);
+
+                CtripHotelSelect.goHotelList(driver);
+                if(selectBrandTab(driver)){
+                    while(!CtripHotelSelect.isScrollBottom(driver)){
+                        CtripHotelSelect.scrollDownBrandList(driver);
+                    }
+                }else{
+
+                }
+
+
                 sleep();
             }
             //scrollCityList(driver);
         }
     }
 
+    static AndroidDriver driver=null;
+    public static AndroidDriver getDriver(){
 
-    private static AndroidDriver getDriver(){
-        AndroidDriver driver=null;
-        DesiredCapabilities des = new DesiredCapabilities();
-        //    des.setCapability("automationName", "Appium");//Selendroid //自动化的模式选择
-        //     des.setCapability("app", "C:\\software\\CalcTest.apk");//配置待测试的apk的路径
+        if(driver==null) {
+            DesiredCapabilities des = new DesiredCapabilities();
+            //    des.setCapability("automationName", "Appium");//Selendroid //自动化的模式选择
+            //     des.setCapability("app", "C:\\software\\CalcTest.apk");//配置待测试的apk的路径
 //      des.setCapability("browserName", "chrome");  //h5
-        des.setCapability("platformName", "Android");//平台名称
-        //des.setCapability("platformVersion", "4.4");//手机操作系统版本
-        //des.setCapability("udid", "192.168.229.101:5555");//连接的物理设备的唯一设备标识
-        des.setCapability("deviceName", "DWH9X17324W22072");//使用的手机类型或模拟器类型  UDID
+            des.setCapability("platformName", "Android");//平台名称
+            //des.setCapability("platformVersion", "4.4");//手机操作系统版本
+            //des.setCapability("udid", "192.168.229.101:5555");//连接的物理设备的唯一设备标识
+            des.setCapability("deviceName", "DWH9X17324W22072");//使用的手机类型或模拟器类型  UDID
 
-        des.setCapability("appPackage", "ctrip.android.view");//App安装后的包名,注意与原来的CalcTest.apk不一样
-        des.setCapability("appActivity", "ctrip.business.splash.CtripSplashActivity");//app测试人员常常要获取activity，进行相关测试,后续会讲到
+            des.setCapability("appPackage", "ctrip.android.view");//App安装后的包名,注意与原来的CalcTest.apk不一样
+            des.setCapability("appActivity", "ctrip.business.splash.CtripSplashActivity");//app测试人员常常要获取activity，进行相关测试,后续会讲到
 
-        //appium服务端超过设置的时间没有收到消息时认为客户端退出，默认60
-        des.setCapability("newCommandTimeout", 60);
-        //等待测试设备ready的超时时间
-        des.setCapability("devicereadyTimeout", 30);
-        //是否启用支持unicode的键盘
-        des.setCapability("unicodeKeyboard", true);
-        //session结束后是否重置键盘
-        des.setCapability("resetKeyboard", true);
+            //appium服务端超过设置的时间没有收到消息时认为客户端退出，默认60
+            des.setCapability("newCommandTimeout", 60);
+            //等待测试设备ready的超时时间
+            des.setCapability("devicereadyTimeout", 30);
+            //是否启用支持unicode的键盘
+            des.setCapability("unicodeKeyboard", true);
+            //session结束后是否重置键盘
+            des.setCapability("resetKeyboard", true);
 
-        try {
-            driver = new AndroidDriver(new URL("http://127.0.0.1:4723/wd/hub"), des);//虚拟机默认地址
-            driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);//设置超时等待时间,默认250ms
-        }catch (Exception ex1){
-            ex1.printStackTrace();
+            try {
+                driver = new AndroidDriver(new URL("http://127.0.0.1:4723/wd/hub"), des);//虚拟机默认地址
+                driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);//设置超时等待时间,默认250ms
+            } catch (Exception ex1) {
+                ex1.printStackTrace();
+            }
         }
         return driver;
 
