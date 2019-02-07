@@ -1,6 +1,9 @@
 package com.bestwehotel.app.appiumdemo;
 
+import org.aspectj.weaver.ast.And;
+
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 import io.appium.java_client.MobileElement;
@@ -14,6 +17,29 @@ public class CtripHotelSelect {
     public static void main(String[] args){
         //AndroidDriver driver = CtripCitySelect.getDriver();
 
+    }
+
+    public static void mainEnter(AndroidDriver driver){
+        CtripHotelSelect.goHotelList(driver);
+        if(selectBrandTab(driver)){
+            while(!CtripHotelSelect.isScrollBottom(driver)){
+                expandBrand(driver);
+                CtripHotelSelect.scrollDownBrandList(driver);
+            }
+            btn_sumbit_Brand(driver);
+            sleep(2000);
+            while(true) {
+                clickAllHotel(driver);
+            }
+        }
+    }
+
+    public static void sleep(long millis){
+        try {
+            Thread.sleep(millis);
+        }catch (Exception ex1){
+            ex1.printStackTrace();
+        }
     }
 
     public static void goHotelList(AndroidDriver driver){
@@ -86,31 +112,54 @@ public class CtripHotelSelect {
         List<MobileElement> list = groups.findElementsByXPath("//android.widget.LinearLayout");
 
         for(MobileElement brandSection:list){
+
+            allBrandFilterClick(brandSection);
+
             List<MobileElement> brandTextList = brandSection.findElementsByXPath("//android.widget.LinearLayout/android.widget.TextView");
             if(brandTextList!=null&&brandTextList.size()>0){
-                if("展开".equals(brandTextList.get(0).getText())){
-                    brandTextList.get(0).click();
-
-                    List<MobileElement> brandList = brandSection.findElementsByXPath("//android.support.v7.widget.RecyclerView");
-
-                    if(brandList!=null&&brandList.size()>0){
-                        List<MobileElement> brandTXT = brandList.get(0).findElementsByXPath("//android.widget.RelativeLayout/android.widget.TextView");
-                        List<MobileElement> brandBG = brandList.get(0).findElementsByXPath("//android.widget.RelativeLayout/android.widget.ImageView");
-                        if(brandBG!=null&&brandBG.size()>0){
-
-                        }else{
-                            if(brandTXT!=null&&brandTXT.size()>0){
-                                if(isWehotelBrand(brandTXT.get(0).getText())){
-                                    brandTXT.get(0).click();
-                                }
-                            }
-                        }
-                    }
-
+                int expandIndex = 1;
+                if(brandTextList.size()==3){
+                    expandIndex=2;
+                }
+                if("展开".equals(brandTextList.get(expandIndex).getText())){
+                    brandTextList.get(expandIndex).click();
                 }
             }
+
+            allBrandFilterClick(brandSection);
         }
 
+    }
+
+    private static void allBrandFilterClick(MobileElement brandSection){
+
+        List<MobileElement> brandList = brandSection.findElementsByXPath("//android.support.v7.widget.RecyclerView");
+
+        if(brandList!=null&&brandList.size()>0){
+            //获取所有的item
+            //List<MobileElement> brandTXT = brandList.get(0).findElementsByXPath("//android.widget.RelativeLayout/android.widget.TextView");
+            List<MobileElement> brandTXTLayout = brandList.get(0).findElementsByXPath("//android.widget.RelativeLayout");
+            //List<MobileElement> brandBG = brandList.get(0).findElementsByXPath("//android.widget.RelativeLayout/android.widget.ImageView");
+            for(MobileElement brandLayout:brandTXTLayout){
+                //System.out.println(brand.getText());
+                List<MobileElement> brandTXT =brandLayout.findElementsByXPath("//android.widget.TextView");
+                List<MobileElement> brandBG = brandLayout.findElementsByXPath("//android.widget.ImageView");
+                if((brandBG==null||brandBG.size()==0)&&brandTXT!=null&&brandTXT.size()>0){
+                    if(isWehotelBrand(brandTXT.get(0).getText())){
+                        brandTXT.get(0).click();
+                    }
+                }
+            }
+//            if(brandBG!=null&&brandBG.size()>0){
+//
+//            }else{
+//                if(brandTXT!=null&&brandTXT.size()>0){
+//                    if(isWehotelBrand(brandTXT.get(0).getText())){
+//                        brandTXT.get(0).click();
+//                    }
+//                }
+//            }
+        }
     }
 
     private static boolean isWehotelBrand(String brand){
@@ -125,9 +174,46 @@ public class CtripHotelSelect {
     }
 
 
-    public static void btn_sumbit(AndroidDriver driver){
+    public static void btn_sumbit_Brand(AndroidDriver driver){
         MobileElement btn = (MobileElement)driver.findElementById("ctrip.android.hotel:id/btn_submit");
         btn.click();
+    }
+
+
+    public static void clickAllHotel(AndroidDriver driver){
+        //获取酒店列表的listview对象
+        MobileElement listContainer = (MobileElement) driver.findElementById("ctrip.android.hotel:id/bottom_refresh_list");
+        //获取酒店列表中的所有item，并且做循环判断
+        List<MobileElement> allHotelItem = listContainer.findElementsByXPath("//android.widget.LinearLayout/android.widget.LinearLayout/android.widget.RelativeLayout");
+        for(MobileElement hotelItem:allHotelItem){
+            List<MobileElement> hotelName = hotelItem.findElementsByXPath("//android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout/android.widget.TextView");
+            if(hotelName!=null&&hotelName.size()>0){
+                if(hasSelectedHotel(hotelName.get(0).getText())){
+                    continue;
+                }else{
+                    hotelItem.click();
+                    return;
+                }
+            }
+        }
+    }
+
+    private static List<String> hasSelecedHotelName = new ArrayList<>();
+
+    private static boolean hasSelectedHotel(String hotelName){
+        if(hasSelecedHotelName.contains(hotelName)){
+            return true;
+        }else{
+            hasSelecedHotelName.add(hotelName);
+            return false;
+        }
+    }
+
+    private static void scrollHotelListDown(AndroidDriver driver){
+        (new TouchAction(driver))
+                .press(PointOption.point(470,658)).waitAction(WaitOptions.waitOptions(Duration.ofSeconds(3)))
+                .moveTo(PointOption.point(470,610)).release()
+                .perform();
     }
 
 }

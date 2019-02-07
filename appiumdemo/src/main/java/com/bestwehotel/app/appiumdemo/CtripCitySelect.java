@@ -24,17 +24,13 @@ public class CtripCitySelect {
             while (true) {
                 goCityPage(driver);
                 //scrollCityList(driver);
-                clickCityIndexA(driver);
-                clickNextCity(driver);
 
-                CtripHotelSelect.goHotelList(driver);
-                if(selectBrandTab(driver)){
-                    while(!CtripHotelSelect.isScrollBottom(driver)){
-                        CtripHotelSelect.scrollDownBrandList(driver);
-                    }
-                }else{
+                //clickCityIndexA(driver);//测试方便改成clickNextHotCity
+                //clickNextCity(driver);//测试方便改成clickNextHotCity
 
-                }
+                clickNextHotCity(driver);
+
+                CtripHotelSelect.mainEnter(driver);
 
 
                 sleep();
@@ -42,6 +38,30 @@ public class CtripCitySelect {
             //scrollCityList(driver);
         }
     }
+
+    public static void clickNextHotCity(AndroidDriver driver){
+        int hotindex = 2;
+        if(isExistHistory(driver)){
+            hotindex=3;
+        }
+        MobileElement indexList = (MobileElement) driver.findElementById("ctrip.android.view:id/list_view_index");
+        List<MobileElement> aButton =  indexList.findElementsByXPath("//android.widget.TextView["+hotindex+"]");
+        if(aButton!=null&&aButton.size()>0) {
+            aButton.get(0).click();
+        }
+
+        MobileElement hotList = (MobileElement) driver.findElementById("ctrip.android.view:id/list_view");
+        List<MobileElement> hotcities = hotList.findElementsByXPath("//android.widget.LinearLayout/android.widget.LinearLayout/android.widget.TextView");
+        for(MobileElement element:hotcities){
+            if(!hasSelectedCity(element.getText())){
+                element.click();
+                return;
+            }
+        }
+        clickNextHotCity(driver);
+
+    }
+
 
     static AndroidDriver driver=null;
     public static AndroidDriver getDriver(){
