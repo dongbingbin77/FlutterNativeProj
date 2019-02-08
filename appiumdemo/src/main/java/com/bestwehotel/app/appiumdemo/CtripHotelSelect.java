@@ -1,6 +1,7 @@
 package com.bestwehotel.app.appiumdemo;
 
 import org.aspectj.weaver.ast.And;
+import org.openqa.selenium.By;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -22,14 +23,18 @@ public class CtripHotelSelect {
     public static void mainEnter(AndroidDriver driver){
         CtripHotelSelect.goHotelList(driver);
         if(selectBrandTab(driver)){
-            while(!CtripHotelSelect.isScrollBottom(driver)){
-                expandBrand(driver);
-                CtripHotelSelect.scrollDownBrandList(driver);
-            }
+//            while(!CtripHotelSelect.isScrollBottom(driver)){
+//                expandBrand(driver);
+//                CtripHotelSelect.scrollDownBrandList(driver);
+//            }
             btn_sumbit_Brand(driver);
             sleep(2000);
             while(true) {
                 clickAllHotel(driver);
+                while(true){
+                    scrollHotelDetailDown(driver);
+                    getHotelDetailRoomItem(driver);
+                }
             }
         }
     }
@@ -214,6 +219,69 @@ public class CtripHotelSelect {
                 .press(PointOption.point(470,658)).waitAction(WaitOptions.waitOptions(Duration.ofSeconds(3)))
                 .moveTo(PointOption.point(470,610)).release()
                 .perform();
+    }
+
+
+    private static void scrollHotelDetailDown(AndroidDriver driver){
+        (new TouchAction(driver))
+                .press(PointOption.point(470,658)).waitAction(WaitOptions.waitOptions(Duration.ofSeconds(3)))
+                .moveTo(PointOption.point(470,550)).release()
+                .perform();
+    }
+
+
+    static List<String> hasSelectedRoomName = new ArrayList<>();
+
+    private static void getHotelDetailRoomItem(AndroidDriver driver){
+
+        MobileElement list_view = (MobileElement) driver.findElementById("ctrip.android.hotel:id/mListView");
+
+        List<MobileElement> room_infos = driver.findElements(By.id("ctrip.android.hotel.detail:id/mBasicRoomItem"));
+
+        for(int i=0;i<room_infos.size();i++){
+            //获取room_info的信息
+            String room_txt="";
+            List<MobileElement> room_name = room_infos.get(i).findElements(By.id("ctrip.android.hotel.detail:id/room_item_name"));
+            if(room_name!=null&&room_name.size()>0){
+                room_txt = room_name.get(0).getText();
+                System.out.println("dongbingbin:"+room_txt);
+            }
+            try {
+                List<MobileElement> arrow = room_infos.get(i).findElements(By.id("ctrip.android.hotel.detail:id/base_room_arrow"));
+                if(arrow!=null&&arrow.size()>0&&arrow.get(0).isDisplayed()){
+                    if(!hasSelectedRoomName.contains(room_txt)) {
+                        arrow.get(0).click();
+
+                        hasSelecedHotelName.add(room_txt);
+                    }
+                }
+            }catch (Exception ex1){
+                ex1.printStackTrace();
+            }
+
+
+            List<MobileElement> plans = list_view.findElementsByXPath("//android.widget.RelativeLayout[@resource-id=\"ctrip.android.hotel.detail:id/mBasicRoomItem\"]["+(i+1)+"]/following-sibling::*");
+
+
+            for(MobileElement plan:plans){
+                if("android.widget.LinearLayout".equals(plan.getTagName())){
+                    try {
+                        String planName = plan.findElementById("ctrip.android.hotel.detail:id/room_item_name").getText();
+                        String planPrice = plan.findElementById("ctrip.android.hotel.detail:id/price_info_text_view").getText();
+                        System.out.println("dongbingbin:planName:"+planName+",planPrice:"+planPrice);
+                    }catch (Exception ex1){
+                        ex1.printStackTrace();
+                    }
+
+                }
+            }
+
+        }
+
+//        for(MobileElement room_info:room_infos){
+//            room_info.findElementsByXPath("//following-sibling::android.widget.LinearLayout[@content-desc=\"hotel_detail_room_item\"]");
+//            System.out.println("dongbignbin");
+//        }
     }
 
 }
