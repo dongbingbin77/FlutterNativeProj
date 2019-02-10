@@ -31,9 +31,11 @@ public class CtripHotelSelect {
             sleep(2000);
             while(true) {
                 clickAllHotel(driver);
+                initHotelDetail(driver);
                 while(true){
-                    scrollHotelDetailDown(driver);
+
                     getHotelDetailRoomItem(driver);
+                    scrollHotelDetailDown(driver);
                 }
             }
         }
@@ -224,51 +226,54 @@ public class CtripHotelSelect {
 
     private static void scrollHotelDetailDown(AndroidDriver driver){
         (new TouchAction(driver))
-                .press(PointOption.point(470,658)).waitAction(WaitOptions.waitOptions(Duration.ofSeconds(3)))
-                .moveTo(PointOption.point(470,550)).release()
+                .press(PointOption.point(1,658)).waitAction(WaitOptions.waitOptions(Duration.ofMillis(2000)))
+                .moveTo(PointOption.point(1,550)).release()
                 .perform();
     }
 
 
     static List<String> hasSelectedRoomName = new ArrayList<>();
 
+    static MobileElement currentExpandRoom = null;
+    static String currentExpandRoomName = "";
+
     private static void getHotelDetailRoomItem(AndroidDriver driver){
 
         MobileElement list_view = (MobileElement) driver.findElementById("ctrip.android.hotel:id/mListView");
 
+
         List<MobileElement> room_infos = driver.findElements(By.id("ctrip.android.hotel.detail:id/mBasicRoomItem"));
 
-        for(int i=0;i<room_infos.size();i++){
-            //获取room_info的信息
-            String room_txt="";
-            List<MobileElement> room_name = room_infos.get(i).findElements(By.id("ctrip.android.hotel.detail:id/room_item_name"));
-            if(room_name!=null&&room_name.size()>0){
-                room_txt = room_name.get(0).getText();
-                System.out.println("dongbingbin:"+room_txt);
-            }
-            try {
-                List<MobileElement> arrow = room_infos.get(i).findElements(By.id("ctrip.android.hotel.detail:id/base_room_arrow"));
-                if(arrow!=null&&arrow.size()>0&&arrow.get(0).isDisplayed()){
-                    if(!hasSelectedRoomName.contains(room_txt)) {
-                        arrow.get(0).click();
+//        while (room_infos==null&&room_infos.size()==0){
+//            scrollHotelDetailDown(driver);
+//        }
 
-                        hasSelecedHotelName.add(room_txt);
+        if(room_infos!=null&&room_infos.size()>0) {
+
+            for(int roomIndex=0;roomIndex<room_infos.size();roomIndex++){
+                MobileElement expandElement = isCanExpand(room_infos.get(roomIndex));
+
+                if(expandElement!=null) {
+
+                    if(isInView(expandElement)) {
+                        getAllPlans(list_view);
+                        //可以展开
+                        expandRoom(driver, room_infos.get(roomIndex));
+                        //遍历所有的展开项目
+                        getAllPlans(list_view);
                     }
-                }
-            }catch (Exception ex1){
-                ex1.printStackTrace();
-            }
 
-
-            List<MobileElement> plans = list_view.findElementsByXPath("//android.widget.RelativeLayout[@resource-id=\"ctrip.android.hotel.detail:id/mBasicRoomItem\"]["+(i+1)+"]/following-sibling::*");
-
-
-            for(MobileElement plan:plans){
-                if("android.widget.LinearLayout".equals(plan.getTagName())){
+                }else{
+                    //不能展开，获取价格
                     try {
-                        String planName = plan.findElementById("ctrip.android.hotel.detail:id/room_item_name").getText();
-                        String planPrice = plan.findElementById("ctrip.android.hotel.detail:id/price_info_text_view").getText();
-                        System.out.println("dongbingbin:planName:"+planName+",planPrice:"+planPrice);
+                        if(room_infos.get(roomIndex).isDisplayed()&&isInView(room_infos.get(roomIndex))) {
+                            MobileElement room_name_element = getRoomItemName(room_infos.get(roomIndex));
+                            MobileElement room_price_element = getRoomItemPrice(room_infos.get(roomIndex));
+
+                            String room_name = room_name_element.getText();
+                            String room_price = room_price_element.getText();
+                            System.out.println("不能展开，直接取信息：" + room_name + "," + room_price);
+                        }
                     }catch (Exception ex1){
                         ex1.printStackTrace();
                     }
@@ -276,12 +281,167 @@ public class CtripHotelSelect {
                 }
             }
 
+
+//            if (currentExpandRoom == null) {
+//                for(int i=0;i<room_infos.size();i++) {
+//
+//                    MobileElement expandElement = isCanExpand(room_infos.get(0));
+//                    if (expandElement != null) {
+//                        //说明可以展开,展开后输出房型名称和价格
+//                        currentExpandRoom = room_infos.get(0);
+//                        expandRoom(driver, room_infos.get((0)));
+//
+//                    } else {
+//                        //说明不可以展开，输出房型名称和价格
+//
+//                    }
+//                }
+//            } else {
+//                if(room_infos.size()>1){
+//                    expandRoom(driver, room_infos.get((1)));
+//                }
+//            }
         }
+
+//        for(int i=0;i<room_infos.size();i++){
+//            //获取room_info的信息
+//            String room_txt="";
+//            List<MobileElement> room_name = room_infos.get(i).findElements(By.id("ctrip.android.hotel.detail:id/room_item_name"));
+//            if(room_name!=null&&room_name.size()>0){
+//                room_txt = room_name.get(0).getText();
+//                System.out.println("dongbingbin:"+room_txt);
+//            }
+//            try {
+//                List<MobileElement> arrow = room_infos.get(i).findElements(By.id("ctrip.android.hotel.detail:id/base_room_arrow"));
+//                if(arrow!=null&&arrow.size()>0&&arrow.get(0).isDisplayed()){
+//                    if(!hasSelectedRoomName.contains(room_txt)) {
+//                        arrow.get(0).click();
+//
+//                        hasSelecedHotelName.add(room_txt);
+//                    }
+//                }
+//            }catch (Exception ex1){
+//                ex1.printStackTrace();
+//            }
+//
+//
+//            List<MobileElement> plans = list_view.findElementsByXPath("//android.widget.RelativeLayout[@resource-id=\"ctrip.android.hotel.detail:id/mBasicRoomItem\"]["+(i+1)+"]/following-sibling::*");
+//
+//
+//            for(MobileElement plan:plans){
+//                if("android.widget.LinearLayout".equals(plan.getTagName())){
+//                    try {
+//                        String planName = plan.findElementById("ctrip.android.hotel.detail:id/room_item_name").getText();
+//                        String planPrice = plan.findElementById("ctrip.android.hotel.detail:id/price_info_text_view").getText();
+//                        System.out.println("dongbingbin:planName:"+planName+",planPrice:"+planPrice);
+//                    }catch (Exception ex1){
+//                        ex1.printStackTrace();
+//                    }
+//
+//                }
+//            }
+//
+//        }
 
 //        for(MobileElement room_info:room_infos){
 //            room_info.findElementsByXPath("//following-sibling::android.widget.LinearLayout[@content-desc=\"hotel_detail_room_item\"]");
 //            System.out.println("dongbignbin");
 //        }
+    }
+
+    public static boolean isInView(MobileElement element){
+        return element.isDisplayed()&&element.getLocation().getY()<1000&&element.getLocation().getY()>317;
+    }
+
+    public static MobileElement isCanExpand(MobileElement roomElement){
+        List<MobileElement> arrow = roomElement.findElements(By.id("ctrip.android.hotel.detail:id/base_room_arrow"));
+        if(arrow!=null&&arrow.size()>0&&arrow.get(0).isDisplayed()){
+            return arrow.get(0);
+        }else{
+            return null;
+        }
+    }
+
+
+    public static void expandRoom(AndroidDriver driver,MobileElement roomElement){
+        List<MobileElement> room_name = roomElement.findElements(By.id("ctrip.android.hotel.detail:id/room_item_name"));
+        String room_txt = "";
+        if(room_name!=null&&room_name.size()>0){
+            room_txt = room_name.get(0).getText();
+            System.out.println("dongbingbin:"+room_txt);
+        }
+        try {
+            List<MobileElement> arrow = roomElement.findElements(By.id("ctrip.android.hotel.detail:id/base_room_arrow"));
+            if(arrow!=null&&arrow.size()>0&&arrow.get(0).isDisplayed()){
+                if(!hasSelectedRoomName.contains(room_txt)) {
+                    arrow.get(0).click();
+                    currentExpandRoomName = room_txt;
+                    hasSelecedHotelName.add(room_txt);
+                }
+            }
+        }catch (Exception ex1){
+            ex1.printStackTrace();
+        }
+    }
+
+    public static MobileElement getRoomItemName(MobileElement roomItemInfo){
+        try {
+            return roomItemInfo.findElementById("ctrip.android.hotel.detail:id/room_item_name");
+        }catch (Exception ex1){
+            ex1.printStackTrace();
+        }
+        return null;
+    }
+
+    public static MobileElement getRoomItemPrice(MobileElement roomItemInfo){
+        try {
+            return roomItemInfo.findElementById("ctrip.android.hotel.detail:id/price_info_text_view");
+        }catch (Exception ex1){
+            ex1.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void getAllPlans(MobileElement list_view){
+        List<MobileElement> plans = list_view.findElementsByXPath("//android.widget.LinearLayout[@content-desc=\"hotel_detail_room_item\"]");
+        for(MobileElement plan:plans) {
+
+            if ("android.widget.LinearLayout".equals(plan.getTagName())) {
+                try {
+                    if(isInView(plan)) {
+                        String planName = plan.findElementById("ctrip.android.hotel.detail:id/room_item_name").getText();
+                        String planPrice = plan.findElementById("ctrip.android.hotel.detail:id/price_info_text_view").getText();
+                        System.out.println("dongbingbin:planName:" + planName + ",planPrice:" + planPrice);
+                    }
+                } catch (Exception ex1) {
+                    ex1.printStackTrace();
+                }
+
+            }
+
+        }
+    }
+
+    public static void initHotelDetail(AndroidDriver driver){
+        MobileElement shop_look = null;
+        while ((shop_look =isLookRoomExist(driver))==null){
+            scrollHotelDetailDown(driver);
+        }
+        try {
+            shop_look.click();
+        }catch (Exception ex1){
+            ex1.printStackTrace();
+        }
+    }
+
+    public static MobileElement isLookRoomExist(AndroidDriver driver){
+        try {
+            MobileElement shop_look = (MobileElement) driver.findElement(By.id("ctrip.android.hotel:id/shop_look_room"));
+            return shop_look;
+        }catch (Exception ex1){
+            ex1.printStackTrace();
+        }
+        return null;
     }
 
 }
