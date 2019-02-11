@@ -256,11 +256,11 @@ public class CtripHotelSelect {
                 if(expandElement!=null) {
 
                     if(isInView(expandElement)) {
-                        getAllPlans(list_view);
+                        getAllPlans(driver,list_view);
                         //可以展开
-                        expandRoom(driver, room_infos.get(roomIndex));
+                        expandRoom(room_infos.get(roomIndex),expandElement);
                         //遍历所有的展开项目
-                        getAllPlans(list_view);
+                        getAllPlans(driver,list_view);
                     }
 
                 }else{
@@ -363,7 +363,9 @@ public class CtripHotelSelect {
     }
 
 
-    public static void expandRoom(AndroidDriver driver,MobileElement roomElement){
+    static MobileElement currentExpandRoomElement;
+
+    public static void expandRoom(MobileElement roomElement,MobileElement expandElement){
         List<MobileElement> room_name = roomElement.findElements(By.id("ctrip.android.hotel.detail:id/room_item_name"));
         String room_txt = "";
         if(room_name!=null&&room_name.size()>0){
@@ -372,11 +374,12 @@ public class CtripHotelSelect {
         }
         try {
             List<MobileElement> arrow = roomElement.findElements(By.id("ctrip.android.hotel.detail:id/base_room_arrow"));
-            if(arrow!=null&&arrow.size()>0&&arrow.get(0).isDisplayed()){
+            if(expandElement!=null&&arrow.get(0).isDisplayed()){
                 if(!hasSelectedRoomName.contains(room_txt)) {
                     arrow.get(0).click();
                     currentExpandRoomName = room_txt;
-                    hasSelecedHotelName.add(room_txt);
+                    hasSelectedRoomName.add(room_txt);
+                    currentExpandRoomElement = roomElement;
                 }
             }
         }catch (Exception ex1){
@@ -402,7 +405,59 @@ public class CtripHotelSelect {
         return null;
     }
 
-    public static void getAllPlans(MobileElement list_view){
+//    public static void getAllPlans(AndroidDriver driver,MobileElement list_view){
+//        if(currentExpandRoomElement!=null){
+//            MobileElement dividerRoom = currentExpandRoomElement.findElementById("ctrip.android.hotel:id/divider_up");
+//
+//            int dividerY= dividerRoom.getLocation().getY();
+//
+//
+//            List<MobileElement> splite_ids = driver.findElementsById("ctrip.android.hotel:id/room_item_split_line");
+//
+//            List<MobileElement> planNames =list_view.findElementsById("ctrip.android.hotel.detail:id/room_item_name");
+//            List<MobileElement> planInfos = list_view.findElementsById("ctrip.android.hotel.detail:id/price_info_text_view");
+//
+//
+//            List<MobileElement> planNames1 = new ArrayList<>();
+//            List<MobileElement> planInfos1 = new ArrayList<>();
+//            if(planNames.size()>0&&planInfos.size()>0&&splite_ids.size()>0) {
+//                for (MobileElement element : planNames) {
+//                    if (element.getLocation().getY() > dividerY&&isLowerThanSplitRoomDivider(splite_ids,element)) {
+//                        planNames1.add(element);
+//                    }
+//                }
+//
+//                for (MobileElement element : planInfos) {
+//                    if (element.getLocation().getY() > dividerY && isLowerThanSplitRoomDivider(splite_ids,element)) {
+//                        planInfos1.add(element);
+//                    }
+//                }
+//            }
+//            if(planNames1.size()==planInfos1.size()){
+//                for(int i=0;i<planInfos1.size();i++){
+//                    String price = planInfos1.get(i).getText();
+//                    String name = planNames1.get(i).getText();
+//                    System.out.println("dongbingbin:planName:" + name + ",planPrice:" + price);
+//                }
+//            }else{
+//                System.out.println("dongbingbin 房型和价格数量不等");
+//            }
+//        }
+//    }
+//
+//    public static boolean isLowerThanSplitRoomDivider(List<MobileElement> splite_dividers,MobileElement targetElement){
+//        int y = targetElement.getLocation().getY();
+//        for(MobileElement divider:splite_dividers){
+//            if(y<divider.getLocation().getY()){
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+
+
+    public static void getAllPlans(AndroidDriver driver,MobileElement list_view){
+
         List<MobileElement> plans = list_view.findElementsByXPath("//android.widget.LinearLayout[@content-desc=\"hotel_detail_room_item\"]");
         for(MobileElement plan:plans) {
 
